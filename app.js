@@ -4,7 +4,7 @@ The starting point of anything you want to use is the window.onload functions at
 There are several different versions as I progressed through different things I added. Most recent is at the top.
 
 I am using this as kind of a test bed to learn Typescript, but also as a way to learn HTLM<Canvas>.
-You'll see a few experiments specifically dedicated to Typescript Inheritence, and a few specifically dedicated to Canvas drawing functions.
+You'll see a few experiments specifically dedicated to Typescript Inheritance, and a few specifically dedicated to Canvas drawing functions.
 
 I would not call any of it "Production Code" (I'm not sure what front end best practices are), but I've tried to keep it fairly well organized.
 */
@@ -236,7 +236,7 @@ var Color = /** @class */ (function () {
         //console.log("newBlueChannel: " + newBlueChannel);
         //return new Color(newRedChannel, newGreenChannel, newBlueChannel, alphaCannel); // Mix Alpha Channels
         return new Color(newRedChannel, newGreenChannel, newBlueChannel, this.a); // Keep the base transparency
-        // Also recommened "Lab Space" conversion
+        // Also recommended "Lab Space" conversion
         //https://stackoverflow.com/questions/649454/what-is-the-best-way-to-average-two-colors-that-define-a-linear-gradient
         //https://stackoverflow.com/questions/398224/how-to-mix-colors-naturally-with-c
         //https://en.wikipedia.org/wiki/CIELAB_color_space
@@ -246,37 +246,34 @@ var Color = /** @class */ (function () {
     return Color;
 }());
 var Sprite = /** @class */ (function () {
-    function Sprite(source, numberOfRows, numberOfColumns) {
-        var _this = this;
+    function Sprite(imageFilePath, numberOfRows, numberOfColumns) {
         this.Loaded = false;
         this.imageFile = new Image();
         this.numberOfRows = numberOfRows;
         this.numberOfColumns = numberOfColumns;
+        this.imagePath = imageFilePath;
+        console.log("sprite created");
+    }
+    Sprite.prototype.BeginFileLoad = function (func) {
+        var _this = this;
+        console.log("Begin Sprite File Load");
         this.imageFile.addEventListener('load', function () {
             _this.totalWidth = _this.imageFile.width;
             _this.totalHeight = _this.imageFile.height;
-            _this.width = _this.totalWidth / numberOfColumns;
-            _this.height = _this.totalHeight / numberOfRows;
+            _this.width = _this.totalWidth / _this.numberOfColumns;
+            _this.height = _this.totalHeight / _this.numberOfRows;
             _this.Loaded = true;
-            console.log("Loaded: " + source);
+            console.log("Loaded: " + _this.imagePath);
+            func;
         }, false);
-        this.imageFile.src = source;
-    }
-    Sprite.prototype.SourceCoordinates = function (columnIndex, rowIndex, scale) {
-        if (rowIndex === void 0) { rowIndex = 0; }
-        var output;
-        output[0] = this.FrameX(columnIndex, rowIndex);
-        output[1] = this.FrameY(columnIndex, rowIndex);
-        output[2] = this.width;
-        output[3] = this.height;
-        return output;
+        this.imageFile.src = this.imagePath;
     };
-    // 0 based index
+    // 0 based indexes
     Sprite.prototype.FrameX = function (columnIndex, rowIndex) {
         if (rowIndex === void 0) { rowIndex = 0; }
         return this.width * columnIndex;
     };
-    // 0 based index
+    // 0 based indexes
     Sprite.prototype.FrameY = function (columnIndex, rowIndex) {
         if (rowIndex === void 0) { rowIndex = 0; }
         return this.height * rowIndex;
@@ -285,14 +282,18 @@ var Sprite = /** @class */ (function () {
 }());
 var LoadManager = /** @class */ (function () {
     function LoadManager(func) {
+        this.sprites = [];
         this.onLoadCallbackFunction = func;
     }
-    LoadManager.prototype.AllObjectsLoaded = function () {
+    LoadManager.prototype.BeginAllDownloads = function (func) {
+        for (var i in this.sprites) {
+            this.sprites[i].BeginFileLoad();
+        }
+    };
+    LoadManager.prototype.AllObjectsLoaded = function (func) {
         if (this.sprites != undefined && this.sprites != undefined) {
-            for (var _i = 0, _a = this.sprites; _i < _a.length; _i++) {
-                var sprite = _a[_i];
-                var obj = sprite;
-                if (sprite.Loaded == false) { //  Why the F can't I cast it within the If or the For loop. It's fucking rediculous.
+            for (var i in this.sprites) {
+                if (this.sprites[i].Loaded == false) { //  Why the F can't I cast it within the If or the For loop. It's fucking ridiculous.
                     return false;
                 }
             }
@@ -304,12 +305,13 @@ var LoadManager = /** @class */ (function () {
             return true;
         }
     };
-    LoadManager.prototype.WaitForAllObjectsLoaded = function () {
-        if (this.AllObjectsLoaded()) {
+    LoadManager.prototype.WaitForAllObjectsLoaded = function (func) {
+        this.BeginAllDownloads(func);
+        if (this.AllObjectsLoaded(func)) {
             this.onLoadCallbackFunction;
         }
         else {
-            // Wait a tic
+            // Wait a tic?? How to automatically kick off when last file loads?
         }
     };
     return LoadManager;
@@ -325,16 +327,20 @@ function tempDrawImage(canvas, img, scaleFactor) {
     canvas.context.drawImage(img, 100, 100, img.width * scaleFactor, img.height * scaleFactor);
 }
 ;
-// // Slicing a sprite sheet
-// // Having trouble figuring out how to wait until all the fiels are loaded, before attempting to draw them.
-// window.onload = function () {
-//     let canvas: BaseCanvas = new BaseCanvas(<HTMLCanvasElement>document.getElementById("canvas"), window);
-//     let loadManager: LoadManager = new LoadManager(function () { console.log("CallbackFunction was called"); })
-//     loadManager.sprites.push(new Sprite('Images/coin-sprite-animation-sprite-sheet.png', 1, 10));
-//     loadManager.AllObjectsLoaded();
-//     //let sprite: Sprite = new Sprite('Images/coin-sprite-animation-sprite-sheet.png', 1, 10);
-//     //canvas.DrawSprite(sprite, 100, 100, 0, 0, 1);
-// };
+// Slicing a sprite sheet
+// Having trouble figuring out how to wait until all the files are loaded, before attempting to draw them.
+window.onload = function () {
+    var canvas = new BaseCanvas(document.getElementById("canvas"), window);
+    var loadManager = new LoadManager(function () { console.log("CallbackFunction was called"); });
+    console.log("load manager created");
+    var sprite = new Sprite('Images/coin-sprite-animation-sprite-sheet.png', 1, 10);
+    loadManager.sprites.push(sprite);
+    loadManager.WaitForAllObjectsLoaded(function () { console.log("CallbackFunction was called2"); });
+    console.log("Begin Download Started");
+    loadManager.AllObjectsLoaded();
+    //let sprite: Sprite = new Sprite('Images/coin-sprite-animation-sprite-sheet.png', 1, 10);
+    //canvas.DrawSprite(sprite, 100, 100, 0, 0, 1);
+};
 //// Displaying real images (ie. maybe a sprite sheet or an icon, or some other png or jpg or something.)
 //// (Works, moving on)
 //window.onload = function () {
@@ -350,31 +356,31 @@ function tempDrawImage(canvas, img, scaleFactor) {
 //    // It's beyond the scope of this tutorial to look at image pre-loading tactics, but you should keep that in mind.
 //    img.src = 'Images/coin-sprite-animation-sprite-sheet.png'; // Set source path
 //};
-// Fun with Gradients. Random balls again, but this time, with gradients (works pretty awesome, moving on.)
-// Adding Text to the display (works, moving on)
-window.onload = function () {
-    var canvas = new BaseCanvas(document.getElementById("canvas"), window);
-    var numberOfDots = randomIntFromInterval(1, 20); //(20 to 100)    
-    // Clip gives it a fun border
-    canvas.context.rect(50, 50, canvas.width - 100, canvas.height - 100);
-    canvas.context.stroke();
-    canvas.context.clip();
-    console.log("numberOfDots = " + numberOfDots);
-    for (var i = 0; i < numberOfDots; i++) {
-        var centerPoint = new Point(randomIntFromInterval(10, canvas.width) - 10, randomIntFromInterval(10, canvas.height - 10));
-        var dot = new Dot(centerPoint, randomIntFromInterval(10, 100));
-        var baseColor = new Color(randomIntFromInterval(0, 200), randomIntFromInterval(0, 200), randomIntFromInterval(0, 200), 1); // Solid Color of the "Ball""
-        var gradientColor = new Color(255, 255, 255, .5); // Color of the "Light"
-        canvas.DrawGradientCircle(dot.centerPoint.x, dot.centerPoint.y, dot.radius, baseColor, gradientColor, true);
-    }
-    var textString = numberOfDots + " Balls";
-    canvas.context.font = '48px serif';
-    canvas.context.fillStyle = 'rgba(0,0,0,1)'; // Reminder, you have to give it a fill style, before you try to do a fill text. MDN does not mention that.
-    canvas.context.fillText(textString, 100, 200);
-    canvas.context.strokeText(textString, 100, 200);
-    var text = canvas.context.measureText(textString); // TextMetrics object
-    console.log("textWidth: " + text.width); // measures the width of the text... assuming it's in pixels?
-};
+// // Fun with Gradients. Random balls again, but this time, with gradients (works pretty awesome, moving on.)
+// // Adding Text to the display (works, moving on)
+// window.onload = function () {
+//    let canvas: BaseCanvas = new BaseCanvas(<HTMLCanvasElement>document.getElementById("canvas"), window);
+//    let numberOfDots: number = randomIntFromInterval(1, 20); //(20 to 100)    
+//    // Clip gives it a fun border
+//    canvas.context.rect(50, 50, canvas.width - 100, canvas.height - 100);
+//    canvas.context.stroke();
+//    canvas.context.clip();
+//    console.log("numberOfDots = " + numberOfDots)
+//    for (let i: number = 0; i < numberOfDots; i++) {
+//        let centerPoint: Point = new Point(randomIntFromInterval(10, canvas.width) - 10, randomIntFromInterval(10, canvas.height - 10))
+//        let dot: Dot = new Dot(centerPoint, randomIntFromInterval(10, 100));
+//        let baseColor: Color = new Color(randomIntFromInterval(0, 200), randomIntFromInterval(0, 200), randomIntFromInterval(0, 200), 1); // Solid Color of the "Ball""
+//        let gradientColor: Color = new Color(255, 255, 255, .5); // Color of the "Light"
+//        canvas.DrawGradientCircle(dot.centerPoint.x, dot.centerPoint.y, dot.radius, baseColor, gradientColor, true)        
+//    }
+//    let textString = numberOfDots + " Balls";
+//    canvas.context.font = '48px serif';
+//    canvas.context.fillStyle = 'rgba(0,0,0,1)'; // Reminder, you have to give it a fill style, before you try to do a fill text. MDN does not mention that.
+//    canvas.context.fillText(textString, 100, 200);
+//    canvas.context.strokeText(textString, 100, 200);
+//    var text = canvas.context.measureText(textString); // TextMetrics object
+//    console.log("textWidth: " + text.width); // measures the width of the text... assuming it's in pixels?
+// };
 //// What is an SVG path? (Seems to work, moving on)
 //// Seem to be vector based rather than point to point.
 //window.onload = function () {
@@ -421,7 +427,7 @@ window.onload = function () {
 //    canvas.context.bezierCurveTo(85, 25, 75, 37, 75, 40);
 //    canvas.context.fill();
 //};
-//// ArcTo is REALLY weird. Bascially you make an angle out of three points... and then add an arc tangent to each side, with a specific radius (Good enough, moving on)
+//// ArcTo is REALLY weird. Basically you make an angle out of three points... and then add an arc tangent to each side, with a specific radius (Good enough, moving on)
 //window.onload = function () {
 //    let canvas: BaseCanvas = new BaseCanvas(<HTMLCanvasElement>document.getElementById("canvas"), window);
 //    canvas.context.beginPath();
@@ -465,7 +471,7 @@ window.onload = function () {
 //    canvas.DrawCircle(30, 10, radius, true, 'red');
 //    canvas.DrawCircle(40, 10, radius, true, '');
 //    canvas.DrawCircle(50, 10, radius, true);
-//    //canvas.DrawCircle(60, 10, radius, 'green'); // This one does not work, need a paraneter for the stroke outline or not.
+//    //canvas.DrawCircle(60, 10, radius, 'green'); // This one does not work, need a parameter for the stroke outline or not.
 //    canvas.DrawCircle(70, 10, radius, true, 'green');
 //    canvas.DrawCircle(80, 10, radius, false, 'rgb(0,0,0,1)'); 
 //    canvas.DrawCircle(85, 10, radius, false, 'rgb(0,0,0,.75)');
@@ -493,8 +499,8 @@ window.onload = function () {
 //        // scrub a line going down the middle, about half the width of the original (just for a test, cause it looks stupid in general)
 //        canvas.context.clearRect(upperLeftCorner.x * i, upperLeftCorner.y * i, width, height);        
 //    }
-//    // Note: it's hard to tell, but it looks like the "clearRect" does not kill the outline... or if it doesn, maybe about half the outline?
-//    // The "rect" commands are the only real primatives.
+//    // Note: it's hard to tell, but it looks like the "clearRect" does not kill the outline... or if it 't', maybe about half the outline?
+//    // The "rect" commands are the only real primitives.
 //    // According to https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API/Tutorial/Drawing_shapes, everything else is built by Paths.
 //    // Similar to how I did my previous "Points, and Shapes" drawing.
 //    // There are several commands required for drawing a path...
@@ -521,7 +527,7 @@ window.onload = function () {
 //    canvas.context.arc(90, 65, 5, 0, Math.PI * 2, true);  // Right eye
 //    canvas.context.stroke();
 //};
-// Testing Typescript Inheritence (This works moving on)
+// Testing Typescript Inheritance (This works moving on)
 //window.onload = function () {
 //    let canvas: BaseCanvas = new BaseCanvas(<HTMLCanvasElement>document.getElementById("canvas"), window);
 //    let centerPoint: Point = new Point(20, 20);
