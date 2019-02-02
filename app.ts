@@ -399,20 +399,20 @@ function tempDrawImage(canvas: BaseCanvas, img: HTMLImageElement, scaleFactor: n
 
 
 
-// Slicing a sprite sheet
-// Having trouble figuring out how to wait until all the fiels are loaded, before attempting to draw them.
-window.onload = function () {
-    let canvas: BaseCanvas = new BaseCanvas(<HTMLCanvasElement>document.getElementById("canvas"), window);
-    let loadManager: LoadManager = new LoadManager(function () { console.log("CallbackFunction was called"); })
+// // Slicing a sprite sheet
+// // Having trouble figuring out how to wait until all the fiels are loaded, before attempting to draw them.
+// window.onload = function () {
+//     let canvas: BaseCanvas = new BaseCanvas(<HTMLCanvasElement>document.getElementById("canvas"), window);
+//     let loadManager: LoadManager = new LoadManager(function () { console.log("CallbackFunction was called"); })
 
-    loadManager.sprites.push(new Sprite('Images/coin-sprite-animation-sprite-sheet.png', 1, 10));
+//     loadManager.sprites.push(new Sprite('Images/coin-sprite-animation-sprite-sheet.png', 1, 10));
 
-    loadManager.AllObjectsLoaded();
+//     loadManager.AllObjectsLoaded();
 
-    //let sprite: Sprite = new Sprite('Images/coin-sprite-animation-sprite-sheet.png', 1, 10);
-    //canvas.DrawSprite(sprite, 100, 100, 0, 0, 1);
+//     //let sprite: Sprite = new Sprite('Images/coin-sprite-animation-sprite-sheet.png', 1, 10);
+//     //canvas.DrawSprite(sprite, 100, 100, 0, 0, 1);
 
-};
+// };
 
 
 //// Displaying real images (ie. maybe a sprite sheet or an icon, or some other png or jpg or something.)
@@ -436,37 +436,37 @@ window.onload = function () {
 //};
 
 
-// // Fun with Gradients. Random balls again, but this time, with gradients (works pretty awesome, moving on.)
-// // Adding Text to the display (works, moving on)
-// window.onload = function () {
-//    let canvas: BaseCanvas = new BaseCanvas(<HTMLCanvasElement>document.getElementById("canvas"), window);
-//    let numberOfDots: number = randomIntFromInterval(1, 20); //(20 to 100)    
+// Fun with Gradients. Random balls again, but this time, with gradients (works pretty awesome, moving on.)
+// Adding Text to the display (works, moving on)
+window.onload = function () {
+   let canvas: BaseCanvas = new BaseCanvas(<HTMLCanvasElement>document.getElementById("canvas"), window);
+   let numberOfDots: number = randomIntFromInterval(1, 20); //(20 to 100)    
 
-//    // Clip gives it a fun border
-//    canvas.context.rect(50, 50, canvas.width - 100, canvas.height - 100);
-//    canvas.context.stroke();
-//    canvas.context.clip();
+   // Clip gives it a fun border
+   canvas.context.rect(50, 50, canvas.width - 100, canvas.height - 100);
+   canvas.context.stroke();
+   canvas.context.clip();
 
-//    console.log("numberOfDots = " + numberOfDots)
-//    for (let i: number = 0; i < numberOfDots; i++) {
-//        let centerPoint: Point = new Point(randomIntFromInterval(10, canvas.width) - 10, randomIntFromInterval(10, canvas.height - 10))
-//        let dot: Dot = new Dot(centerPoint, randomIntFromInterval(10, 100));
+   console.log("numberOfDots = " + numberOfDots)
+   for (let i: number = 0; i < numberOfDots; i++) {
+       let centerPoint: Point = new Point(randomIntFromInterval(10, canvas.width) - 10, randomIntFromInterval(10, canvas.height - 10))
+       let dot: Dot = new Dot(centerPoint, randomIntFromInterval(10, 100));
 
-//        let baseColor: Color = new Color(randomIntFromInterval(0, 200), randomIntFromInterval(0, 200), randomIntFromInterval(0, 200), 1); // Solid Color of the "Ball""
-//        let gradientColor: Color = new Color(255, 255, 255, .5); // Color of the "Light"
+       let baseColor: Color = new Color(randomIntFromInterval(0, 200), randomIntFromInterval(0, 200), randomIntFromInterval(0, 200), 1); // Solid Color of the "Ball""
+       let gradientColor: Color = new Color(255, 255, 255, .5); // Color of the "Light"
 
-//        canvas.DrawGradientCircle(dot.centerPoint.x, dot.centerPoint.y, dot.radius, baseColor, gradientColor, true)        
-//    }
+       canvas.DrawGradientCircle(dot.centerPoint.x, dot.centerPoint.y, dot.radius, baseColor, gradientColor, true)        
+   }
 
-//    let textString = numberOfDots + " Balls";
-//    canvas.context.font = '48px serif';
-//    canvas.context.fillStyle = 'rgba(0,0,0,1)'; // Reminder, you have to give it a fill style, before you try to do a fill text. MDN does not mention that.
-//    canvas.context.fillText(textString, 100, 200);
-//    canvas.context.strokeText(textString, 100, 200);
+   let textString = numberOfDots + " Balls";
+   canvas.context.font = '48px serif';
+   canvas.context.fillStyle = 'rgba(0,0,0,1)'; // Reminder, you have to give it a fill style, before you try to do a fill text. MDN does not mention that.
+   canvas.context.fillText(textString, 100, 200);
+   canvas.context.strokeText(textString, 100, 200);
 
-//    var text = canvas.context.measureText(textString); // TextMetrics object
-//    console.log("textWidth: " + text.width); // measures the width of the text... assuming it's in pixels?
-// };
+   var text = canvas.context.measureText(textString); // TextMetrics object
+   console.log("textWidth: " + text.width); // measures the width of the text... assuming it's in pixels?
+};
 
 
 //// What is an SVG path? (Seems to work, moving on)
