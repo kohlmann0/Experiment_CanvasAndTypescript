@@ -339,48 +339,62 @@ class Sprite {
     }
 }
 
-class LoadManager {
-    sprites: Sprite[] = [];
-    onLoadCallbackFunction: Function;
+class ResourceManager_Images {
+    self: ResourceManager_Images; // using "self" to get around the bad "this" reference in the callback function.
+    loadedCounter: number;
+    sourceList: { [sourceUrl: string]: HTMLImageElement } = {};
 
-    constructor(func: Function) {
-        this.onLoadCallbackFunction = func;
-    }
+    constructor() {
+        this.loadedCounter = 0;
+        this.self = this;
+    };
 
-    BeginAllDownloads(func?: Function) {
-        for (let i in this.sprites) {
-            this.sprites[i].BeginFileLoad();
-        }
-    }
 
-    AllObjectsLoaded(func?:Function) {
-        if (this.sprites != undefined && this.sprites != undefined) {
-            for (let i in this.sprites) {
-                if (this.sprites[i].Loaded == false) { //  Why the F can't I cast it within the If or the For loop. It's fucking ridiculous.
-                    return false;
-                }
-            }
-            console.log("All Objects Loaded")
-            return true;
+    percentLoaded(): number {
+        if (Object.keys(this.sourceList).length == 0) {
+            return 0;
         }
         else {
-            console.log("All Objects Loaded")
-            return true
+            return (this.loadedCounter / Object.keys(this.sourceList).length) * 100;
         }
     }
 
-    WaitForAllObjectsLoaded(func?:Function) {
-        this.BeginAllDownloads(func);
-        if (this.AllObjectsLoaded(func)) {
-            this.onLoadCallbackFunction;
+    getImage(url: string, originalCallback): HTMLImageElement {
+        //console.log("Entering getImage: " + url);
+        let newCallback = () => {
+            //console.log('Enter getImage callback: ' + url);
+            originalCallback();
+            //console.log('Exit getImage callback');
         }
-        else {
-            // Wait a tic?? How to automatically kick off when last file loads?
+
+        if (this.sourceList[url] != undefined && this.sourceList[url] != null) {
+            return this.sourceList[url];
+        } else {
+            this.sourceList[url] = this.downloadImage(url, newCallback); // As a callback, what do we really want to do? Right now just increment the counter, but, otherwise, what?
+            return this.sourceList[url];
         }
+        //console.log("Exiting getImage: " + url);
     }
 
+    downloadImage(url: string, originalCallback): HTMLImageElement {
+        //console.log("Entering downloadImage: " + url)
+        let newCallback = () => {
+            //console.log('Enter downloadImage callback: ' + url);
+            this.loadedCounter++;
+            console.log("Image Download Complete: " + url + ' | Counter: ' + this.loadedCounter)
+            originalCallback();
+            //console.log('Exit downloadImage callback');
+        }
+
+        let img = new Image();
+        img.addEventListener('load', newCallback); // Why doesn't this fucking work!! Why won't it call the call-back.
+        img.src = url;
+        //console.log("TEST COMPLETE FIELD: " + url + "|" + img.complete); // This doesn't seem to work as expected... It shows up as true, as soon as I set the img.src... Cacheing maybe? Local Hard drive maybe?
+        //console.log("Exiting downloadImage: " + url)
+
+        return img;
+    }
 }
-
 
 
 // Static Helper Functions
