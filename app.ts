@@ -409,27 +409,95 @@ function tempDrawImage(canvas: BaseCanvas, img: HTMLImageElement, scaleFactor: n
 
     canvas.context.drawImage(img, 100, 100, img.width * scaleFactor, img.height * scaleFactor)
 
-};
+}
+
+function tempOutputStatus(resourceManager_Images: ResourceManager_Images): void {
+    console.log('ResoureManager %complete: ' + resourceManager_Images.percentLoaded() + ' (qty ' + resourceManager_Images.loadedCounter + ' of ' + Object.keys(resourceManager_Images.sourceList).length + ')');
+    for (let i in resourceManager_Images.sourceList) {
+        console.log('Image Status: (' + i + ') | ' + resourceManager_Images.sourceList[i].complete);
+    }
+
+    if (resourceManager_Images.percentLoaded() != 100) {
+        let timeTicSeconds: number = 5;
+        window.setTimeout(() => tempOutputStatus(resourceManager_Images), timeTicSeconds * 1000);
+        console.log('TimeTic: ' + timeTicSeconds);
+    }
+    else {
+        console.log('All Images Loaded');
+        console.log('ResoureManager quantity: ' + Object.keys(resourceManager_Images.sourceList).length);
+        console.log('ResoureManager loadedCounter: ' + resourceManager_Images.loadedCounter);
+        console.log('ResoureManager complete: ' + resourceManager_Images.percentLoaded());
+    }
+}
 
 
+//// Download Manager as Object
+//// Took me forever, but I finally got it. Works well enough to use it, but 
+//var resourceManager_Images: ResourceManager_Images = new ResourceManager_Images(); // Note: I have this outside of the onLoad method, so that I can still access it for debugging, even after it's run. Otherwise, could probably keep it inside the main method
+//window.onload = function () {
+//    //console.log('ResoureManager quantity: ' + Object.keys(resourceManager_Images.sourceList).length);
+//    //console.log('ResoureManager loadedCounter: ' + resourceManager_Images.loadedCounter);
+//    //console.log('ResoureManager complete: ' + resourceManager_Images.percentLoaded());
 
-// Slicing a sprite sheet
-// Having trouble figuring out how to wait until all the files are loaded, before attempting to draw them.
-window.onload = function () {
-    let canvas: BaseCanvas = new BaseCanvas(<HTMLCanvasElement>document.getElementById("canvas"), window);
-    let loadManager: LoadManager = new LoadManager(function () { console.log("CallbackFunction was called"); })
-    console.log("load manager created")
-    let sprite:Sprite = new Sprite('Images/coin-sprite-animation-sprite-sheet.png', 1, 10);
-    
-    loadManager.sprites.push(sprite);
-    loadManager.WaitForAllObjectsLoaded(function () { console.log("CallbackFunction was called2"); });
-    console.log("Begin Download Started")
-    loadManager.AllObjectsLoaded();
+//    var image1: HTMLImageElement = resourceManager_Images.getImage('Images/coin-sprite-animation-sprite-sheet.png', () => { }); //console.log("### Original Callback Function") });
+//    var image2: HTMLImageElement = resourceManager_Images.getImage('https://imgsv.imaging.nikon.com/lineup/dslr/d600/img/sample01/img_02.png', () => { }); //console.log("### Original Callback Function") });
+//    var image3: HTMLImageElement = resourceManager_Images.getImage('Images/coin-sprite-animation-sprite-sheet.png', () => { }); //console.log("### Original Callback Function") });
+//    var image4: HTMLImageElement = resourceManager_Images.getImage('Images/coin-sprite-animation-sprite-sheet.png', () => { }); //console.log("### Original Callback Function") });
+//    tempOutputStatus(resourceManager_Images);
+//}
 
-    //let sprite: Sprite = new Sprite('Images/coin-sprite-animation-sprite-sheet.png', 1, 10);
-    //canvas.DrawSprite(sprite, 100, 100, 0, 0, 1);
 
-};
+// Download Manager test (copied from Stack exchange as a reference)
+// In general, this works and gives a general structure of how to do it.
+// Now to convert this to a class of some sort.
+//https://stackoverflow.com/questions/3646036/javascript-preloading-images
+//window.onload = function () {
+//    preloadImages([
+//        'https://imgsv.imaging.nikon.com/lineup/dslr/d600/img/sample01/img_01.png',
+//        'Images/coin-sprite-animation-sprite-sheet.png'
+//    ], function () {
+//        console.log('All images were loaded');
+//    });
+//};
+
+//function preloadImages(urls, allImagesLoadedCallback) {
+//    var loadedCounter = 0;
+//    var toBeLoadedNumber = urls.length;
+//    urls.forEach(function (url) {
+//        preloadImage(url, function () {
+//            loadedCounter++;
+//            console.log('Number of loaded images: ' + loadedCounter);
+//            if (loadedCounter == toBeLoadedNumber) {
+//                allImagesLoadedCallback();
+//            }
+//        });
+//    });
+
+//    function preloadImage(url, anImageLoadedCallback) {
+//        var img = new Image();
+//        img.onload = anImageLoadedCallback;
+//        img.src = url;
+//    }
+//}
+
+//// Slicing a sprite sheet
+//// DO Not Use -- doesn't work right yet.
+//// Having trouble figuring out how to wait until all the files are loaded, before attempting to draw them.
+//window.onload = function () {
+//    let canvas: BaseCanvas = new BaseCanvas(<HTMLCanvasElement>document.getElementById("canvas"), window);
+//    let loadManager: LoadManager = new LoadManager(function () { console.log("CallbackFunction was called"); })
+//    console.log("load manager created")
+//    let sprite:Sprite = new Sprite('Images/coin-sprite-animation-sprite-sheet.png', 1, 10);
+//    
+//    loadManager.sprites.push(sprite);
+//    loadManager.WaitForAllObjectsLoaded(function () { console.log("CallbackFunction was called2"); });
+//    console.log("Begin Download Started")
+//    loadManager.AllObjectsLoaded();
+//
+//    //let sprite: Sprite = new Sprite('Images/coin-sprite-animation-sprite-sheet.png', 1, 10);
+//    //canvas.DrawSprite(sprite, 100, 100, 0, 0, 1);
+//
+//};
 
 
 //// Displaying real images (ie. maybe a sprite sheet or an icon, or some other png or jpg or something.)
